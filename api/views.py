@@ -24,6 +24,11 @@ def findPost(req):
     if not userID and not postID:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     try:
+        int(userID if userID else 0)
+        int(postID if postID else 0)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    try:
         posts = Post.objects
         if userID:
             posts = posts.filter(userId=userID)
@@ -33,7 +38,8 @@ def findPost(req):
         if(posts.count() == 0):
             raise Exception('No record locally')
         print('got from local database')
-        concate = extern.getPost(userID,None)
+        if(userID and not postID):
+            concate = extern.getPost(userID,None)
 
     except:
         try:
@@ -79,7 +85,7 @@ class modifyPost(APIView):
 
         objects = Post.objects.filter(id=body['id'],userId=body['userId'])
         if(objects.count() == 0):
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         
         if ('title' in body):
             objects.update(title=body['title'])
@@ -94,9 +100,15 @@ class modifyPost(APIView):
         postID = req.query_params.get('id')
         if not userID or not postID: 
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            int(userID)
+            int(postID)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         objects = Post.objects.filter(id=postID,userId=userID)
         if(objects.count() == 0):
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_404_NOT_FOUND)
         objects.delete()
         return Response(status=status.HTTP_200_OK)
     

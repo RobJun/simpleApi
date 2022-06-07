@@ -1,7 +1,9 @@
 
 
 
-
+#required fields is tuple of tuples containing name of the field, type and boolean specifing Hard error
+# Hard error is raised when required field isn't in request body or field content error
+# Soft error is raised only when content error appears (when types are diffrent)
 def checkInputData(data : dict, requiredFields: tuple = (('id',int,True),('userId',int,True),('title',str,False),('body',str,False))):
     for attribute,typ,hardError in requiredFields:
         if(attribute in data and isinstance(data[attribute],typ)):
