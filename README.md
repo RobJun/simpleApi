@@ -13,6 +13,7 @@ First create ```config.json``` file which contains:
     "secret" : "<secret key>"
 }
 ```
+###### Manual install
 
 Start virtual environment:
 
