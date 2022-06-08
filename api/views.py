@@ -19,7 +19,7 @@ from api.utils import checkInputData
 def findPost(req):
     userID =  req.query_params.get('userId')
     postID = req.query_params.get('id')
-    many = False
+    many = False if postID else True
     concate = None
     if not userID and not postID:
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -28,29 +28,26 @@ def findPost(req):
         int(postID if postID else 0)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    
     try:
         posts = Post.objects
         if userID:
             posts = posts.filter(userId=userID)
         if postID:
             posts = posts.filter(id=postID)
-        many = posts.count() > 1
         if(posts.count() == 0):
             raise Exception('No record locally')
-        print('got from local database')
-        if(userID and not postID):
+        if(userID and not postID): # adds posts from extern API
             concate = extern.getPost(userID,None)
-
     except:
         try:
             posts = extern.getPost(userID,postID)
         except Exception as e:
-            return Response({'message': e.__str__()},status=status.HTTP_404_NOT_FOUND)
-        if (not userID and postID):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if (not userID and postID): # save post to 
             Post(posts).save()
-        if (userID and not postID):
+        elif (userID and not postID):
             many = True
-        print('got from extern database')
     return Response(serializePosts(posts,many=many,concate=concate))
 
 
@@ -60,7 +57,7 @@ class modifyPost(APIView):
         try:
             checkInputData(body,(('userId',int,True),('title',str,True),('body',str,True)))
         except Exception as e:
-            return Response({'message' : e.__str__()},status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
         if(not extern.validateId(body['userId'])):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
                 
@@ -71,15 +68,14 @@ class modifyPost(APIView):
 
     def patch(self,req):
         body = req.data
-        obj = None
 
         try: # check if body contains all the reuquired fields and are formated right
             checkInputData(body)
         except Exception as e:
-            return Response({'message' : e.__str__()},status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
         try:
-            obj = Post.objects.filter(id=body['id'])
+            Post.objects.get(id=body['id'])
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -101,14 +97,17 @@ class modifyPost(APIView):
         if not userID or not postID: 
             return Response(status=status.HTTP_400_BAD_REQUEST)
         try:
-            int(userID)
-            int(postID)
+            userID = int(userID)
+            postID = int(postID)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        objects = Post.objects.filter(id=postID,userId=userID)
+        objects = Post.objects.filter(id=postID)
         if(objects.count() == 0):
             return Response(status=status.HTTP_404_NOT_FOUND)
+        print(objects[0].userId)
+        if(objects[0].userId != userID):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         objects.delete()
         return Response(status=status.HTTP_200_OK)
     

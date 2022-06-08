@@ -1,6 +1,6 @@
 #### Usage
 
-Documentation for API calls can be found [here](https://app.swaggerhub.com/apis/RobJun/amcef/1.0.0#/).
+Documentation for API calls can be found [here](https://app.swaggerhub.com/apis-docs/RobJun/amcef/1.0.0).
 
 Required python version is 3.10
 
@@ -10,9 +10,10 @@ First create ```config.json``` file which contains:
 
 ```json
 {
-    "secret" : "<secret key>"
+    "secret" : "<secret key>" 
 }
 ```
+
 ###### Manual install
 
 Start virtual environment:
@@ -55,3 +56,9 @@ If you are using docker all you need to do while in project directory run comman
 #must be inside directory of the project
 docker-compose up
 ```
+
+Now server is listening on port 8000
+
+###### Time to complete
+
+total work time: 5h

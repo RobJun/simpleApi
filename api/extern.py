@@ -28,7 +28,6 @@ def getPost(userID : int = None ,id : int =None):
         assert(len(body) > 0)
         if id: # find post with id within users posts
             for item in body:
-                print(item['id'])
                 if item['id'] == int(id):
                     return item
             raise Exception("User({:}) doesn't own a post with id:{:}".format(userID,id))
